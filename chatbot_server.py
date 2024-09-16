@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import os
 import requests
 from flask_cors import CORS
 
@@ -6,7 +7,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 
 # Enable CORS for all routes
-CORS(app, resources={r"/chat": {"origins": "*"}})
+CORS(app)
 
 # Define the API Gateway URL (replace this with your actual endpoint)
 API_URL = "https://lnuv0i4a09.execute-api.us-east-1.amazonaws.com/dev/"
@@ -36,7 +37,7 @@ def chat():
         if response.status_code == 200:
             result = response.json()
             # Get the answer from the API response
-            answer = result.get('Answer', "I don't have an answer for you")
+            answer = result.get('Answer', 'No response available from API.')
             return jsonify({"answer": answer})
         else:
             # Handle the case where the API returns a non-200 status code
@@ -50,7 +51,7 @@ def chat():
         # Handle network errors
         return jsonify({"error": "API request failed", "message": str(e)}), 500
 
-# Run the Flask app
 if __name__ == '__main__':
-    # Make the app accessible externally via 0.0.0.0
-    app.run(host='0.0.0.0', port=5001)
+    # Bind to the port specified by Heroku
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
