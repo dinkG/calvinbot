@@ -1,7 +1,8 @@
 async function sendMessage() {
     const message = document.getElementById('messageInput').value;
+
     try {
-        const response = await fetch('https://whispering-journey-33686-b637147571a8.herokuapp.com/', {
+        const response = await fetch('https://whispering-journey-33686-b637147571a8.herokuapp.com/chat', { // Ensure correct endpoint
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
