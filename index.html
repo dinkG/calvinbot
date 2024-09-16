@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #121212; /* Dark background */
+            color: #e0e0e0; /* Light text color */
+        }
+        .chat-container {
+            width: 80%;
+            max-width: 600px;
+            background-color: #1e1e1e; /* Slightly lighter dark background for chat box */
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .messages {
+            flex: 1;
+            padding: 20px;
+            border-bottom: 1px solid #333; /* Darker border color */
+            overflow-y: auto;
+            height: 400px;
+        }
+        .message {
+            margin-bottom: 10px;
+        }
+        .message.user {
+            text-align: right;
+        }
+        .message.john-calvin {
+            text-align: left;
+        }
+        .input-container {
+            display: flex;
+            border-top: 1px solid #333; /* Darker border color */
+            background-color: #1e1e1e; /* Matching input area background */
+        }
+        .input-container input {
+            flex: 1;
+            border: none;
+            padding: 10px;
+            font-size: 16px;
+            color: #e0e0e0; /* Light text color for input */
+            background-color: #333; /* Darker background for input field */
+        }
+        .input-container button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff; /* Blue button color */
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .input-container button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="messages" id="messages"></div>
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Type your question..." />
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    <script>
+        async function sendMessage() {
+            const inputField = document.getElementById('user-input');
+            const messagesDiv = document.getElementById('messages');
+            const userQuestion = inputField.value.trim();
+
+            if (!userQuestion) {
+                return; // Don't send empty questions
+            }
+
+            // Display user's question
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'message user';
+            userMessageDiv.textContent = `You: ${userQuestion}`;
+            messagesDiv.appendChild(userMessageDiv);
+
+            // Clear the input field
+            inputField.value = '';
+
+            try {
+                // Send POST request to Flask server
+                const response = await fetch('http://localhost:5001/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: userQuestion,
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Display John Calvin's response
+                const botMessageDiv = document.createElement('div');
+                botMessageDiv.className = 'message john-calvin';
+                botMessageDiv.textContent = `John Calvin: ${data.answer || 'No response available'}`;
+                messagesDiv.appendChild(botMessageDiv);
+
+            } catch (error) {
+                // Handle errors
+                const errorMessageDiv = document.createElement('div');
+                errorMessageDiv.className = 'message john-calvin';
+                errorMessageDiv.textContent = `John Calvin: Error occurred: ${error.message}`;
+                messagesDiv.appendChild(errorMessageDiv);
+            }
+
+            // Scroll to the bottom of the messages div
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Optional: Send message when Enter is pressed
+        document.getElementById('user-input').addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
