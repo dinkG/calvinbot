@@ -1,11 +1,12 @@
 async function sendMessage() {
-    const message = document.getElementById('messageInput').value;
+    const message = document.getElementById('user-input').value;
 
     try {
-        const response = await fetch('https://whispering-journey-33686-b637147571a8.herokuapp.com/chat', { // Ensure correct endpoint
+        const response = await fetch('https://whispering-journey-33686-b637147571a8.herokuapp.com/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                // You can include custom headers if needed
             },
             body: JSON.stringify({ question: message }),
         });
@@ -21,3 +22,6 @@ async function sendMessage() {
         document.getElementById('response').innerText = 'Sorry, there was a problem with the request.';
     }
 }
+
+// Attach event listener to the button
+document.getElementById('submit-button').addEventListener('click', sendMessage);
