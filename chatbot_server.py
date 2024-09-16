@@ -4,9 +4,8 @@ from flask_cors import CORS
 import os
 
 app = Flask(__name__)
-
-# Enable CORS for the specified origin
-CORS(app, resources={r"/chat": {"origins": "http://theologiananswers.com"}})
+# Enable CORS for all origins
+CORS(app)
 
 # Define the API URL from an environment variable or use a default one
 API_URL = os.getenv('API_URL', 'https://lnuv0i4a09.execute-api.us-east-1.amazonaws.com/dev/')
