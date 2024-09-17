@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
-import requests
 from flask_cors import CORS
+import requests
 import os
 
 app = Flask(__name__)
@@ -15,8 +15,12 @@ API_URL_AQUINAS = os.getenv('API_URL_AQUINAS', 'https://aquinas-api.com/dev/')
 API_URL_LUTHER = os.getenv('API_URL_LUTHER', 'https://co9rp2odta.execute-api.us-east-1.amazonaws.com/Dev/')
 API_URL_EDWARDS = os.getenv('API_URL_EDWARDS', 'https://edwards-api.com/dev/')
 
+# In-memory storage for user count (not persistent)
+user_count = 0
+
 @app.route('/chat', methods=['POST', 'OPTIONS'])
 def chat():
+    global user_count
     if request.method == 'OPTIONS':
         # Preflight request handler
         return _build_cors_prelight_response()
@@ -58,6 +62,21 @@ def chat():
 
     except requests.exceptions.RequestException as e:
         return _build_cors_actual_response(jsonify({"error": "API request failed", "message": str(e)}), 500)
+
+@app.route('/user-count', methods=['GET'])
+def get_user_count():
+    return _build_cors_actual_response(jsonify({"user_count": user_count}))
+
+@app.before_first_request
+def initialize_user_count():
+    global user_count
+    user_count = 0
+
+@app.after_request
+def after_request(response):
+    global user_count
+    user_count += 1
+    return response
 
 # Function to handle CORS preflight responses
 def _build_cors_prelight_response():
