@@ -50,7 +50,6 @@ def chat():
             answer = result.get('Answer', 'No response available from the API.')
             citation = result.get('Citation', '')  # Extract citation
 
-
             return _build_cors_actual_response(jsonify({"answer": answer, "citation": citation}))  # Include citation in response
         else:
             return _build_cors_actual_response(jsonify({
@@ -75,3 +74,7 @@ def _build_cors_actual_response(response):
     response.headers.add("Access-Control-Allow-Origin", "https://theologiananswers.com")
     response.headers.add("Access-Control-Allow-Headers", "Content-Type")
     return response
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
