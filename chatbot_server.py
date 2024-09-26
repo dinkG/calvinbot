@@ -8,29 +8,6 @@ app = Flask(__name__)
 # Allow CORS for specific origin with necessary headers and support for preflight requests
 CORS(app, resources={r"/chat": {"origins": "https://theologiananswers.com"}}, supports_credentials=True)
 
-# Configure the database URI (update this with your actual database credentials)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://username:password@localhost/theologian_chatbot'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-# Initialize the database object
-db = SQLAlchemy(app)
-
-# Define the User model to store user information
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    signup_date = db.Column(db.DateTime, default=db.func.current_timestamp())
-
-# Define the Interaction model to store user interactions with theologians
-class Interaction(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_email = db.Column(db.String(100), nullable=False)
-    question = db.Column(db.Text, nullable=False)
-    theologian = db.Column(db.String(50), nullable=False)
-    response = db.Column(db.Text, nullable=False)
-    citation = db.Column(db.Text, nullable=True)  # Add citation field
-    interaction_date = db.Column(db.DateTime, default=db.func.current_timestamp())
-
 # Define the API URLs for different theologians from environment variables or default URLs
 API_URL_CALVIN = os.getenv('API_URL_CALVIN', 'https://lnuv0i4a09.execute-api.us-east-1.amazonaws.com/dev/')
 API_URL_AUGUSTINE = os.getenv('API_URL_AUGUSTINE', 'https://augustine-api.com/dev/')
@@ -73,10 +50,6 @@ def chat():
             answer = result.get('Answer', 'No response available from the API.')
             citation = result.get('Citation', '')  # Extract citation
 
-            # Store the interaction in the database
-            interaction = Interaction(user_email=user_email, question=user_question, theologian=theologian, response=answer, citation=citation)
-            db.session.add(interaction)
-            db.session.commit()
 
             return _build_cors_actual_response(jsonify({"answer": answer, "citation": citation}))  # Include citation in response
         else:
@@ -102,8 +75,3 @@ def _build_cors_actual_response(response):
     response.headers.add("Access-Control-Allow-Origin", "https://theologiananswers.com")
     response.headers.add("Access-Control-Allow-Headers", "Content-Type")
     return response
-
-if __name__ == '__main__':
-    db.create_all()  # This creates the tables if they don't already exist
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
