@@ -51,7 +51,7 @@ def chat():
 
             # Add the citation to the end of the answer if it exists
             if citation:
-                answer += f"\n\n[Citation]({citation})"
+                answer += f"\n\nSource:({citation})"
 
             return _build_cors_actual_response(jsonify({"answer": answer}))
         else:
