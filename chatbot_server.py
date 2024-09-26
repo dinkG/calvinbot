@@ -20,6 +20,22 @@ URL_REPLACEMENTS = {
     "s3://lutherbot/bondage.txt": "https://partner.logosbible.com/click.track?CID=432198&AFID=564576&nonencodedurl=https://www.logos.com/product/149302/the-bondage-of-the-will"
 }
 
+# Function to save the article in the articles directory
+def save_article(theologian, question, response):
+    # Ensure the articles directory exists
+    if not os.path.exists('articles'):
+        os.makedirs('articles')
+    
+    # Create a filename using the theologian's name and question
+    safe_question = "".join([c for c in question if c.isalnum() or c in (' ', '_')]).rstrip()
+    filename = f"{theologian}_{safe_question[:50]}.txt"  # Limit filename length to avoid issues
+    filepath = os.path.join('articles', filename)
+    
+    # Write the content to the file
+    with open(filepath, 'w') as file:
+        file.write(f"Title: {theologian} - {question}\n")
+        file.write(f"Response:\n{response}\n")
+
 @app.route('/chat', methods=['POST', 'OPTIONS'])
 def chat():
     if request.method == 'OPTIONS':
@@ -60,7 +76,10 @@ def chat():
 
             # Add the citation to the end of the answer if it exists
             if citation:
-                answer += f"\n\nSource:{citation}"
+                answer += f"\n\nSource: {citation}"
+
+            # Save the article
+            save_article(theologian, user_question, answer)
 
             return _build_cors_actual_response(jsonify({"answer": answer}))
         else:
