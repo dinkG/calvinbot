@@ -29,6 +29,7 @@ class Interaction(db.Model):
     question = db.Column(db.Text, nullable=False)
     theologian = db.Column(db.String(50), nullable=False)
     response = db.Column(db.Text, nullable=False)
+    citation = db.Column(db.Text, nullable=True)  # Add citation field
     interaction_date = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 # Define the API URLs for different theologians from environment variables or default URLs
@@ -50,7 +51,7 @@ def chat():
 
     user_question = data['question']
     theologian = data['theologian']
-    user_email = data['email']  # Assuming email is sent along with the question
+    user_email = data['email']
 
     try:
         # Handle different theologians by calling the appropriate API
@@ -71,13 +72,14 @@ def chat():
         if response.status_code == 200:
             result = response.json()
             answer = result.get('Answer', 'No response available from the API.')
+            citation = result.get('Citation', '')  # Extract citation
 
             # Store the interaction in the database
-            interaction = Interaction(user_email=user_email, question=user_question, theologian=theologian, response=answer)
+            interaction = Interaction(user_email=user_email, question=user_question, theologian=theologian, response=answer, citation=citation)
             db.session.add(interaction)
             db.session.commit()
 
-            return _build_cors_actual_response(jsonify({"answer": answer}))
+            return _build_cors_actual_response(jsonify({"answer": answer, "citation": citation}))  # Include citation in response
         else:
             return _build_cors_actual_response(jsonify({
                 "error": "Error from API",

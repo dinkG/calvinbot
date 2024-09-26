@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Theologian Chatbot</title>
     <style>
-        /* Existing styles */
         body {
             font-family: Arial, sans-serif;
             background-color: #121212;
@@ -13,77 +13,107 @@
             margin: 0;
             padding: 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            height: 100vh;
         }
-        .container {
-            max-width: 600px;
+
+        /* Hero Section Container */
+        .hero-section {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            max-width: 1200px;
             width: 100%;
+            margin-top: 20px;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Hero Text */
+        .hero-text {
+            flex: 1;
+            min-width: 300px;
+            max-width: 500px;
+            padding: 20px;
+            background-color: #003366;
+            border-radius: 8px;
+            color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-text h1 {
+            font-size: 2em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .hero-text p {
+            font-size: 1em;
+            text-align: center;
+        }
+
+        /* Features Section */
+        .features {
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            margin-top: 15px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 15px;
+        }
+
+        .feature {
+            background-color: #333;
+            border-radius: 8px;
+            padding: 15px;
+            flex: 1 1 45%;
+            min-width: 250px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .feature h3 {
+            font-size: 1.2em;
+            margin-bottom: 8px;
+        }
+
+        /* Chatbot Container */
+        .container {
+            flex: 1;
+            min-width: 300px;
+            max-width: 500px;
             padding: 20px;
             background-color: #1e1e1e;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
+            order: -1;
         }
-        h1 {
+
+        .container h2 {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
-        .signup-banner {
-            background-color: #003366; /* Dark blue color */
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            color: #fff;
-            display: none; /* Initially hidden */
-        }
-        .signup-banner h2 {
-            margin: 0;
-            font-size: 1.2em;
-        }
-        .signup-banner p {
-            margin: 10px 0;
-            font-size: 0.9em;
-        }
-        .signup-form {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .signup-form input[type="email"] {
-            padding: 10px;
-            border: 1px solid #333;
-            border-radius: 4px;
-            background-color: #222;
-            color: #e0e0e0;
-            width: 100%;
-            box-sizing: border-box;
-            max-width: 250px;
-        }
-        .signup-form button {
-            padding: 10px;
-            background-color: #003366; /* Dark blue color */
-            border: none;
-            border-radius: 4px;
-            color: #fff;
-            cursor: pointer;
-        }
-        .signup-form button:hover {
-            background-color: #002244; /* Darker blue */
-        }
+
         .dropdown {
             margin-bottom: 10px;
             display: flex;
             flex-direction: column;
         }
+
         .dropdown label {
             margin-bottom: 5px;
             font-weight: bold;
         }
+
         .dropdown select {
             padding: 10px;
             background-color: #222;
@@ -93,13 +123,15 @@
             cursor: pointer;
             font-size: 1em;
         }
+
         .chat-box {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
+
         .messages {
-            height: 300px; /* Fixed height */
+            height: 300px;
             overflow-y: auto;
             margin-bottom: 10px;
             padding: 10px;
@@ -108,10 +140,8 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            background-size: cover;
-            background-position: center;
-            transition: background-image 1s ease-in-out; /* Smooth transition for background image */
         }
+
         .message {
             background-color: #444;
             padding: 10px;
@@ -119,145 +149,263 @@
             max-width: 75%;
             word-wrap: break-word;
         }
+
         .user-message {
             align-self: flex-end;
-            background-color: #003366; /* Dark blue color */
+            background-color: #003366;
             color: white;
         }
+
         .bot-message {
             align-self: flex-start;
             background-color: #222;
             color: #fff;
         }
+
         .chat-box input[type="text"] {
             padding: 10px;
             border: 1px solid #333;
             border-radius: 4px;
             background-color: #222;
             color: #e0e0e0;
-            width: calc(100% - 22px);
         }
+
         .chat-box button {
             padding: 10px;
-            background-color: #003366; /* Dark blue color */
+            background-color: #003366;
             border: none;
             border-radius: 4px;
             color: #fff;
             cursor: pointer;
         }
+
         .chat-box button:hover {
-            background-color: #002244; /* Darker blue */
+            background-color: #002244;
         }
-        .thank-you-message {
-            display: none; /* Initially hidden */
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
-            color: #4caf50; /* Green color for success message */
-            margin-bottom: 20px;
-            font-size: 1.1em;
+            transform: translateY(50px);
+            opacity: 0;
+            animation: slide-up 0.5s forwards;
         }
 
-        /* Background images for different theologians */
-        .bg-calvin {
-            background-image: url('calvin-bg.png');
-        }
-        .bg-augustine {
-            background-image: url('augustine-bg.jpg');
-        }
-        .bg-aquinas {
-            background-image: url('aqunias-bg.jpg');
-        }
-        .bg-luther {
-            background-image: url('luther-bg.jpg');
-        }
-        .bg-edwards {
-            background-image: url('edwards-bg.jpg');
+        @keyframes slide-up {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
-        /* Loading spinner styles */
-        .loading {
-            display: none; /* Initially hidden */
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #003366;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-            align-self: center;
+        .close-modal {
+            color: #fff;
+            float: right;
+            font-size: 1.5em;
+            cursor: pointer;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* Dark Mode Mailchimp Embed Form */
+        #mc_embed_signup {
+            background: #1e1e1e;
+            color: #e0e0e0;
+            font: 14px Helvetica, Arial, sans-serif;
+            padding: 0px;
+            border-radius: 8px;
+            text-align: center;
+            width: 100%;
+        }
+
+        #mc_embed_signup h2 {
+            color: #e0e0e0;
+        }
+
+        #mc_embed_signup input[type="email"],
+        #mc_embed_signup input[type="text"] {
+            padding: 10px;
+            width: 80%;
+            max-width: 400px;
+            margin: 10px 0;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background-color: #222;
+            color: #e0e0e0;
+        }
+
+        #mc_embed_signup .button {
+            padding: 10px 20px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+
+        #mc_embed_signup .button:hover {
+            background-color: #388e3c;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-section {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .feature-list {
+                flex-direction: column;
+            }
+
+            .feature {
+                width: 100%;
+            }
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <div class="thank-you-message" id="thank-you-message">Thank you for signing up!</div>
-        <div class="signup-banner" id="signup-banner">
-            <h2>Sign Up for More Features</h2>
-            <p>Create an account to access premium features and personalized responses.</p>
-            <div class="signup-form">
-                <input type="email" id="signup-email" placeholder="Enter your email">
-                <button id="signup-button">Sign Up</button>
+    <!-- Hero Section with Chatbot and Text Side by Side -->
+    <div class="hero-section">
+        <!-- Chatbot Container -->
+        <div class="container" id="chat-container">
+            <h2>Ask a Theologian</h2>
+            <div class="dropdown">
+                <label for="theologian-select">Choose a theologian:</label>
+                <select id="theologian-select">
+                    <option value="calvin">John Calvin</option>
+                    <option value="augustine">Augustine of Hippo</option>
+                    <option value="aquinas">Thomas Aquinas</option>
+                    <option value="luther">Martin Luther</option>
+                    <option value="edwards">Jonathan Edwards</option>
+                </select>
+            </div>
+            <div class="messages" id="messages"></div>
+            <div class="chat-box">
+                <input type="text" id="user-input" placeholder="Type your question here...">
+                <button id="submit-button">Ask</button>
+                <div class="loading" id="loading-spinner"></div>
             </div>
         </div>
-        <h1>Ask a Theologian</h1>
-        <div class="dropdown">
-            <label for="theologian-select">Choose a theologian:</label>
-            <select id="theologian-select">
-                <option value="calvin">John Calvin</option>
-                <option value="augustine">Augustine of Hippo</option>
-                <option value="aquinas">Thomas Aquinas</option>
-                <option value="luther">Martin Luther</option>
-                <option value="edwards">Jonathan Edwards</option>
-            </select>
+
+        <!-- Hero Text and Features -->
+        <div class="hero-text">
+            <h1>The Ultimate Theologian Chatbot</h1>
+            <p>Engage with the wisdom of history's greatest theologians.</p>
+            <div class="features">
+                <div class="feature-list">
+                    <div class="feature">
+                        <h3>In-Depth Conversations</h3>
+                        <p>Ask any question and get answers rooted in theological thought.</p>
+                    </div>
+                    <div class="feature">
+                        <h3>Multiple Theologians</h3>
+                        <p>Chat with John Calvin, Augustine, Aquinas, and many more.</p>
+                    </div>
+                    <div class="feature">
+                        <h3>Instant Access</h3>
+                        <p>No more waiting; get insightful responses in real-time.</p>
+                    </div>
+                    <div class="feature">
+                        <h3>Personalized Interactions</h3>
+                        <p>Experience tailored responses that cater to your theological inquiries.</p>
+                    </div>
+                    <div class="feature">
+                        <h3>Historical Accuracy</h3>
+                        <p>Receive answers that reflect historical theological perspectives.</p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="messages" id="messages"></div>
-        <div class="chat-box">
-            <input type="text" id="user-input" placeholder="Type your question here...">
-            <button id="submit-button">Ask</button>
-            <div class="loading" id="loading-spinner"></div> <!-- Loading spinner -->
+    </div>
+
+    <!-- Modal for Mailchimp Form -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-modal">&times;</span>
+            <div id="mc_embed_signup">
+                <form id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate">
+                    <div id="mc_embed_signup_scroll">
+                        <h2>Instant Access Submission Form</h2>
+                        <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+                        <div class="mc-field-group">
+                            <label for="mce-EMAIL">Email Address <span class="asterisk">*</span></label>
+                            <input type="email" name="EMAIL" class="required email" id="mce-EMAIL" required>
+                        </div>
+                        <div class="mc-field-group">
+                            <label for="mce-FNAME">First Name</label>
+                            <input type="text" name="FNAME" class="text" id="mce-FNAME">
+                        </div>
+                        <div class="mc-field-group">
+                            <label for="mce-PHONE">Phone Number</label>
+                            <input type="text" name="PHONE" class="REQ_CSS" id="mce-PHONE">
+                        </div>
+                        <div id="mce-responses" class="clear">
+                            <div class="response" id="mce-error-response" style="display:none;"></div>
+                            <div class="response" id="mce-success-response" style="display:none;"></div>
+                        </div>
+                        <div class="clear">
+                            <input type="submit" name="subscribe" id="mc-embedded-subscribe" class="button" value="Subscribe">
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <script>
+        // Check if the user has already signed up
+        if (localStorage.getItem('subscribed') === 'true') {
+            window.location.href = '/chat.html';
+        }
+
         window.onload = function() {
-            const email = localStorage.getItem('signup-email');
-            if (email) {
-                document.getElementById('signup-banner').style.display = 'none';
-                document.getElementById('thank-you-message').style.display = 'none';
-            } else {
-                document.getElementById('signup-banner').style.display = 'block';
-            }
-            // Set the initial chat window background and send a greeting message
-            updateChatBackground(true); // True indicates we should send a greeting message
+            updateChatBackground(true);
         };
 
-        document.getElementById('signup-button').addEventListener('click', function() {
-            const email = document.getElementById('signup-email').value.trim();
-            if (email === '') {
-                alert('Please enter your email.');
-                return;
-            }
-            // Store email in localStorage
-            localStorage.setItem('signup-email', email);
-
-            // Hide the sign-up form and show thank you message
-            document.getElementById('signup-banner').style.display = 'none';
-            document.getElementById('thank-you-message').style.display = 'none';
+        document.getElementById('submit-button').addEventListener('click', function() {
+            document.getElementById('modal').classList.add('show');
         });
 
-        document.getElementById('submit-button').addEventListener('click', sendMessage);
-        document.getElementById('user-input').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
+        document.getElementById('close-modal').addEventListener('click', function() {
+            document.getElementById('modal').classList.remove('show');
         });
 
-        document.getElementById('theologian-select').addEventListener('change', function() {
-            updateChatBackground(true); // True indicates we should send a greeting message
+        document.getElementById('mc-embedded-subscribe-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Store subscription status in localStorage
+            localStorage.setItem('subscribed', 'true');
+
+            // Redirect to chat page
+            window.location.href = '/chat.html';
         });
 
         async function sendMessage() {
@@ -266,17 +414,11 @@
             const theologian = document.getElementById('theologian-select').value;
             if (message === '') return;
 
-            // Display user message
             appendMessage(message, 'user-message');
-
-            // Clear input field
             inputField.value = '';
-
-            // Show loading spinner
             document.getElementById('loading-spinner').style.display = 'block';
 
             try {
-                // Send the message to the chatbot server with selected theologian
                 const response = await fetch('https://whispering-journey-33686-b637147571a8.herokuapp.com/chat', {
                     method: 'POST',
                     headers: {
@@ -284,7 +426,7 @@
                     },
                     body: JSON.stringify({
                         question: message,
-                        theologian: theologian  // Pass the selected theologian
+                        theologian: theologian
                     }),
                 });
 
@@ -294,14 +436,11 @@
 
                 const data = await response.json();
                 const botResponse = data.answer || 'No answer received.';
-
-                // Display bot response
                 appendMessage(botResponse, 'bot-message');
             } catch (error) {
                 console.error('There was a problem with the request:', error);
                 appendMessage('Sorry, there was a problem with the request.', 'bot-message');
             } finally {
-                // Hide loading spinner
                 document.getElementById('loading-spinner').style.display = 'none';
             }
         }
@@ -313,12 +452,13 @@
             messagesContainer.appendChild(messageElement);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-            // Add typing effect
             typeMessage(messageElement, text);
         }
 
         function typeMessage(element, text, speed = 30) {
             let index = 0;
+            element.textContent = '';
+
             function type() {
                 if (index < text.length) {
                     element.textContent += text.charAt(index);
@@ -334,12 +474,9 @@
             const messagesContainer = document.getElementById('messages');
             let greetingText = '';
 
-            // Remove all existing messages
             messagesContainer.innerHTML = '';
-
-            // Remove any existing theologian background classes
             messagesContainer.className = 'messages';
-            // Add the background class and greeting message based on the selected theologian
+
             switch (theologian) {
                 case 'calvin':
                     messagesContainer.classList.add('bg-calvin');
@@ -362,15 +499,15 @@
                     greetingText = 'Welcome! Jonathan Edwards is here to explore theological matters with you.';
                     break;
                 default:
-                    messagesContainer.classList.add('bg-calvin'); // Default background if no theologian selected
+                    messagesContainer.classList.add('bg-calvin');
                     greetingText = 'Welcome! John Calvin here, ready to delve into the depths of theology with you.';
             }
 
-            // Display the greeting message if specified
             if (sendGreeting) {
                 appendMessage(greetingText, 'bot-message');
             }
         }
     </script>
 </body>
+
 </html>
