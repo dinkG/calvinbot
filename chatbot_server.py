@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 import requests
 from flask_cors import CORS
 import os
-import json
+import pymysql
 
 app = Flask(__name__)
 
@@ -16,14 +16,23 @@ API_URL_AQUINAS = os.getenv('API_URL_AQUINAS', 'https://aquinas-api.com/dev/')
 API_URL_LUTHER = os.getenv('API_URL_LUTHER', 'https://co9rp2odta.execute-api.us-east-1.amazonaws.com/Dev/')
 API_URL_EDWARDS = os.getenv('API_URL_EDWARDS', 'https://edwards-api.com/dev/')
 
-# Directory to store articles
-ARTICLES_DIR = './articles'
+# Database connection details
+DB_HOST = 'articles-db.c3wekyg2gws1.us-east-1.rds.amazonaws.com'
+DB_USER = 'admin'
+DB_PASSWORD = 'Flop56!!'
+DB_NAME = 'theologian_chatbot'
 
-# Mapping of specific S3 URLs to new URLs
-URL_REPLACEMENTS = {
-    "s3://lutherbot/bondage.txt": "https://partner.logosbible.com/click.track?CID=432198&AFID=564576&nonencodedurl=https://www.logos.com/product/149302/the-bondage-of-the-will"
-}
+# Helper function to connect to the database
+def connect_to_db():
+    return pymysql.connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DB_NAME,
+        cursorclass=pymysql.cursors.DictCursor
+    )
 
+# Route to handle chat requests
 @app.route('/chat', methods=['POST', 'OPTIONS'])
 def chat():
     if request.method == 'OPTIONS':
@@ -58,17 +67,11 @@ def chat():
             answer = result.get('Answer', 'No response available from the API.')
             citation = result.get('Citation', '')
 
-            # Replace the citation if it matches any in the URL_REPLACEMENTS
-            if citation in URL_REPLACEMENTS:
-                citation = URL_REPLACEMENTS[citation]
+            # Store the interaction as an article in the database
+            article_title = f"{theologian}: {user_question}"
+            store_article(article_title, answer)
 
-            # Add the citation to the end of the answer if it exists
-            if citation:
-                answer += f"\n\nSource: {citation}"
-
-            # Create an article using the question and answer
-            create_article(user_question, theologian, answer)
-
+            # Return the response
             return _build_cors_actual_response(jsonify({"answer": answer}))
         else:
             return _build_cors_actual_response(jsonify({
@@ -80,44 +83,34 @@ def chat():
     except requests.exceptions.RequestException as e:
         return _build_cors_actual_response(jsonify({"error": "API request failed", "message": str(e)}), 500)
 
-def create_article(question, theologian, answer):
-    """
-    Create an article and save it to the articles directory.
-    """
+# Function to store an article in the database
+def store_article(title, content):
     try:
-        if not os.path.exists(ARTICLES_DIR):
-            os.makedirs(ARTICLES_DIR)
-        
-        # Prepare the article data
-        article = {
-            "title": f"{theologian.capitalize()} on: {question}",
-            "content": answer
-        }
-
-        # Define a unique filename for the article
-        filename = os.path.join(ARTICLES_DIR, f"{theologian}_{len(os.listdir(ARTICLES_DIR)) + 1}.json")
-
-        # Write the article to a JSON file
-        with open(filename, 'w') as file:
-            json.dump(article, file)
+        connection = connect_to_db()
+        with connection.cursor() as cursor:
+            sql = "INSERT INTO articles (title, content) VALUES (%s, %s)"
+            cursor.execute(sql, (title, content))
+        connection.commit()
     except Exception as e:
-        print(f"Failed to create article: {e}")
+        print(f"Error storing article: {e}")
+    finally:
+        connection.close()
 
+# Route to fetch articles from the database
 @app.route('/articles', methods=['GET'])
 def get_articles():
-    """
-    Retrieve all articles in the articles directory.
-    """
     try:
-        articles = []
-        for filename in os.listdir(ARTICLES_DIR):
-            if filename.endswith('.json'):
-                with open(os.path.join(ARTICLES_DIR, filename), 'r') as file:
-                    article = json.load(file)
-                    articles.append(article)
+        connection = connect_to_db()
+        with connection.cursor() as cursor:
+            sql = "SELECT title, content FROM articles"
+            cursor.execute(sql)
+            articles = cursor.fetchall()
         return jsonify(articles)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"Error fetching articles: {e}")
+        return jsonify({"error": "Error fetching articles"}), 500
+    finally:
+        connection.close()
 
 # Function to handle CORS preflight responses
 def _build_cors_prelight_response():
