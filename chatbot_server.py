@@ -22,12 +22,13 @@ def chat():
     
     data = request.get_json()
 
-    if 'question' not in data or 'theologian' not in data or 'email' not in data:
+    if 'question' not in data or 'theologian' not in data:
         return jsonify({"error": "Invalid input"}), 400
+
 
     user_question = data['question']
     theologian = data['theologian']
-    user_email = data['email']
+
 
     try:
         # Handle different theologians by calling the appropriate API
