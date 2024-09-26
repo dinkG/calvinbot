@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import requests
 from flask_cors import CORS
 import os
+import json
 
 app = Flask(__name__)
 
@@ -15,17 +16,13 @@ API_URL_AQUINAS = os.getenv('API_URL_AQUINAS', 'https://aquinas-api.com/dev/')
 API_URL_LUTHER = os.getenv('API_URL_LUTHER', 'https://co9rp2odta.execute-api.us-east-1.amazonaws.com/Dev/')
 API_URL_EDWARDS = os.getenv('API_URL_EDWARDS', 'https://edwards-api.com/dev/')
 
+# Directory to store articles
+ARTICLES_DIR = './articles'
+
 # Mapping of specific S3 URLs to new URLs
 URL_REPLACEMENTS = {
     "s3://lutherbot/bondage.txt": "https://partner.logosbible.com/click.track?CID=432198&AFID=564576&nonencodedurl=https://www.logos.com/product/149302/the-bondage-of-the-will"
 }
-
-# Directory to store generated articles
-ARTICLES_DIR = 'articles'
-
-# Ensure the articles directory exists
-if not os.path.exists(ARTICLES_DIR):
-    os.makedirs(ARTICLES_DIR)
 
 @app.route('/chat', methods=['POST', 'OPTIONS'])
 def chat():
@@ -69,8 +66,8 @@ def chat():
             if citation:
                 answer += f"\n\nSource: {citation}"
 
-            # Save the generated response as an article
-            save_article(user_question, theologian, answer)
+            # Create an article using the question and answer
+            create_article(user_question, theologian, answer)
 
             return _build_cors_actual_response(jsonify({"answer": answer}))
         else:
@@ -83,28 +80,44 @@ def chat():
     except requests.exceptions.RequestException as e:
         return _build_cors_actual_response(jsonify({"error": "API request failed", "message": str(e)}), 500)
 
-# Save the response as a new article in the articles directory
-def save_article(question, theologian, answer):
-    article_title = f"{theologian.title()} - {question}"
-    filename = os.path.join(ARTICLES_DIR, f"{theologian}_{len(os.listdir(ARTICLES_DIR)) + 1}.txt")
-    with open(filename, 'w') as file:
-        file.write(f"Title: {article_title}\n\n{answer}")
+def create_article(question, theologian, answer):
+    """
+    Create an article and save it to the articles directory.
+    """
+    try:
+        if not os.path.exists(ARTICLES_DIR):
+            os.makedirs(ARTICLES_DIR)
+        
+        # Prepare the article data
+        article = {
+            "title": f"{theologian.capitalize()} on: {question}",
+            "content": answer
+        }
 
-# Endpoint to get articles
+        # Define a unique filename for the article
+        filename = os.path.join(ARTICLES_DIR, f"{theologian}_{len(os.listdir(ARTICLES_DIR)) + 1}.json")
+
+        # Write the article to a JSON file
+        with open(filename, 'w') as file:
+            json.dump(article, file)
+    except Exception as e:
+        print(f"Failed to create article: {e}")
+
 @app.route('/articles', methods=['GET'])
 def get_articles():
-    articles = []
-    if os.path.exists(ARTICLES_DIR):
+    """
+    Retrieve all articles in the articles directory.
+    """
+    try:
+        articles = []
         for filename in os.listdir(ARTICLES_DIR):
-            if filename.endswith('.txt'):
-                filepath = os.path.join(ARTICLES_DIR, filename)
-                with open(filepath, 'r') as file:
-                    content = file.read()
-                    title_line = content.splitlines()[0]
-                    title = title_line.replace('Title: ', '')
-                    articles.append({'title': title, 'content': content})
-
-    return jsonify(articles)
+            if filename.endswith('.json'):
+                with open(os.path.join(ARTICLES_DIR, filename), 'r') as file:
+                    article = json.load(file)
+                    articles.append(article)
+        return jsonify(articles)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # Function to handle CORS preflight responses
 def _build_cors_prelight_response():
