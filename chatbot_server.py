@@ -25,10 +25,8 @@ def chat():
     if 'question' not in data or 'theologian' not in data:
         return jsonify({"error": "Invalid input"}), 400
 
-
     user_question = data['question']
     theologian = data['theologian']
-
 
     try:
         # Handle different theologians by calling the appropriate API
@@ -49,9 +47,13 @@ def chat():
         if response.status_code == 200:
             result = response.json()
             answer = result.get('Answer', 'No response available from the API.')
-            citation = result.get('Citation', '')  # Extract citation
+            citation = result.get('Citation', '')
 
-            return _build_cors_actual_response(jsonify({"answer": answer, "citation": citation}))  # Include citation in response
+            # Add the citation to the end of the answer if it exists
+            if citation:
+                answer += f"\n\n[Citation]({citation})"
+
+            return _build_cors_actual_response(jsonify({"answer": answer}))
         else:
             return _build_cors_actual_response(jsonify({
                 "error": "Error from API",
