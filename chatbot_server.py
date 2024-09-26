@@ -15,6 +15,11 @@ API_URL_AQUINAS = os.getenv('API_URL_AQUINAS', 'https://aquinas-api.com/dev/')
 API_URL_LUTHER = os.getenv('API_URL_LUTHER', 'https://co9rp2odta.execute-api.us-east-1.amazonaws.com/Dev/')
 API_URL_EDWARDS = os.getenv('API_URL_EDWARDS', 'https://edwards-api.com/dev/')
 
+# Mapping of specific S3 URLs to new URLs
+URL_REPLACEMENTS = {
+    "s3://lutherbot/bondage.txt": "https://partner.logosbible.com/click.track?CID=432198&AFID=564576&nonencodedurl=https://www.logos.com/product/149302/the-bondage-of-the-will"
+}
+
 @app.route('/chat', methods=['POST', 'OPTIONS'])
 def chat():
     if request.method == 'OPTIONS':
@@ -49,9 +54,13 @@ def chat():
             answer = result.get('Answer', 'No response available from the API.')
             citation = result.get('Citation', '')
 
+            # Replace the citation if it matches any in the URL_REPLACEMENTS
+            if citation in URL_REPLACEMENTS:
+                citation = URL_REPLACEMENTS[citation]
+
             # Add the citation to the end of the answer if it exists
             if citation:
-                answer += f"\n\nSource:({citation})"
+                answer += f"\n\nSource:{citation}"
 
             return _build_cors_actual_response(jsonify({"answer": answer}))
         else:
