@@ -80,6 +80,18 @@
             color: #003366;
         }
 
+        .article p {
+            color: #e0e0e0;
+        }
+
+        .read-more {
+            display: block;
+            margin-top: 10px;
+            text-decoration: none;
+            color: #4caf50;
+            font-weight: bold;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .nav-bar {
@@ -96,7 +108,7 @@
     <!-- Navigation Bar -->
     <div class="nav-bar">
         <a href="../chat.html" class="nav-button">Theologian</a>
-        <a href="answers.html" class="nav-button">Answers</a>
+        <a href="/answers" class="nav-button">Answers</a>
     </div>
 
     <!-- Articles Section -->
@@ -106,7 +118,7 @@
                 <div class="article">
                     <h2>{{ article.title }}</h2>
                     <p>{{ article.content[:150] }}...</p>
-                    <a href="/article/{{ article.id }}">Read more</a>
+                    <a href="/article/{{ article.id }}" class="read-more">Read more</a>
                 </div>
             {% endfor %}
         {% else %}
