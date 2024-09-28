@@ -1,0 +1,20 @@
+# Ignore Python bytecode and other generated files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore virtual environments
+venv/
+env/
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE and editor config files
+.vscode/
+.idea/
+
+# Ignore any specific files or folders in your project
+instance/
