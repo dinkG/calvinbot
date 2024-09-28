@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" type="image/jpg" href="ask.jpg" />
+    <link rel="icon" type="image/jpg" href="ask.jpg"/>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Theologian Answers - Articles</title>
@@ -80,6 +80,10 @@
             color: #003366;
         }
 
+        .article p {
+            color: #e0e0e0;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .nav-bar {
@@ -89,7 +93,6 @@
         }
     </style>
 </head>
-
 <body>
     <!-- Title -->
     <div class="site-title">Theologian<span class="highlight">Answers.com</span></div>
@@ -117,22 +120,36 @@
                 const articlesSection = document.getElementById('articles-section');
                 articlesSection.innerHTML = ''; // Clear any existing content
 
-                articles.forEach(article => {
-                    const articleElement = document.createElement('div');
-                    articleElement.className = 'article';
+                // Populate articles
+                if (articles.length > 0) {
+                    articles.forEach(article => {
+                        const articleElement = document.createElement('div');
+                        articleElement.className = 'article';
 
-                    const titleElement = document.createElement('h2');
-                    titleElement.textContent = article.title;
-                    articleElement.appendChild(titleElement);
+                        const titleElement = document.createElement('h2');
+                        titleElement.textContent = article.title;
+                        articleElement.appendChild(titleElement);
 
-                    const contentElement = document.createElement('p');
-                    contentElement.textContent = article.content;
-                    articleElement.appendChild(contentElement);
+                        const contentElement = document.createElement('p');
+                        contentElement.textContent = article.content;
+                        articleElement.appendChild(contentElement);
 
-                    articlesSection.appendChild(articleElement);
-                });
+                        articlesSection.appendChild(articleElement);
+                    });
+                } else {
+                    // Display message if no articles are found
+                    const noArticlesElement = document.createElement('p');
+                    noArticlesElement.textContent = 'No articles available at the moment.';
+                    noArticlesElement.style.color = '#fff';
+                    articlesSection.appendChild(noArticlesElement);
+                }
             } catch (error) {
                 console.error('Error fetching articles:', error);
+                const articlesSection = document.getElementById('articles-section');
+                const errorElement = document.createElement('p');
+                errorElement.textContent = 'An error occurred while fetching articles. Please try again later.';
+                errorElement.style.color = '#ff5555';
+                articlesSection.appendChild(errorElement);
             }
         }
 
@@ -140,5 +157,4 @@
         window.onload = fetchArticles;
     </script>
 </body>
-
 </html>
