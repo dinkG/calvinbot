@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" type="image/jpg" href="ask.jpg"/>
+    <link rel="icon" type="image/jpg" href="ask.jpg" />
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Theologian Answers - Articles</title>
     <style>
         body {
@@ -80,17 +80,6 @@
             color: #003366;
         }
 
-        .article a {
-            color: #003366;
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.3s;
-        }
-
-        .article a:hover {
-            color: #fff;
-        }
-
         /* Responsive Design */
         @media (max-width: 768px) {
             .nav-bar {
@@ -106,8 +95,8 @@
 
     <!-- Navigation Bar -->
     <div class="nav-bar">
-        <a href="calvinanswers/chat.html" class="nav-button">Theologian</a>
-        <a href="answers" class="nav-button">Answers</a>
+        <a href="../chat.html" class="nav-button">Theologian</a>
+        <a href="answers.html" class="nav-button">Answers</a>
     </div>
 
     <!-- Articles Section -->
@@ -115,8 +104,9 @@
         {% if articles %}
             {% for article in articles %}
                 <div class="article">
-                    <h2><a href="/article/{{ article.id }}">{{ article.title }}</a></h2>
-                    <p>{{ article.content[:150] }}...</p> <!-- Show a snippet of the content -->
+                    <h2>{{ article.title }}</h2>
+                    <p>{{ article.content[:150] }}...</p>
+                    <a href="/article/{{ article.id }}">Read more</a>
                 </div>
             {% endfor %}
         {% else %}
