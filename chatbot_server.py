@@ -128,7 +128,7 @@ def show_articles():
             return jsonify({"error": "Error connecting to the database"}), 500
 
         with connection.cursor() as cursor:
-            fetch_articles_query = "SELECT title, content FROM articles"
+            fetch_articles_query = "SELECT id, title, content FROM articles"
             cursor.execute(fetch_articles_query)
             articles = cursor.fetchall()
         
@@ -137,6 +137,32 @@ def show_articles():
     except Exception as e:
         print(f"Error fetching articles: {e}")
         return jsonify({"error": "Error fetching articles"}), 500
+    finally:
+        if connection:
+            connection.close()
+
+# Route to fetch a single article by its ID and render it
+@app.route('/article/<int:article_id>', methods=['GET'])
+def view_article(article_id):
+    try:
+        connection = connect_to_db()
+        if connection is None:
+            print("Failed to connect to the database.")
+            return jsonify({"error": "Error connecting to the database"}), 500
+
+        with connection.cursor() as cursor:
+            fetch_article_query = "SELECT title, content FROM articles WHERE id = %s"
+            cursor.execute(fetch_article_query, (article_id,))
+            article = cursor.fetchone()
+        
+        if article is None:
+            return render_template('article.html', title="Article Not Found", content="The article you are looking for does not exist.")
+        
+        # Render the article using the article.html template
+        return render_template('article.html', title=article['title'], content=article['content'])
+    except Exception as e:
+        print(f"Error fetching the article: {e}")
+        return jsonify({"error": "Error fetching the article"}), 500
     finally:
         if connection:
             connection.close()
