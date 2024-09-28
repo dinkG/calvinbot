@@ -1,13 +1,13 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
 import requests
+from flask_cors import CORS
 import os
 import pymysql
 
 app = Flask(__name__)
 
-# Allow CORS for all routes from 'https://theologiananswers.com'
-CORS(app, resources={r"/*": {"origins": "https://theologiananswers.com"}}, supports_credentials=True)
+# Allow CORS for specific origin with necessary headers and support for preflight requests
+CORS(app, resources={r"/chat": {"origins": "https://theologiananswers.com"}}, supports_credentials=True)
 
 # Define the API URLs for different theologians from environment variables or default URLs
 API_URL_CALVIN = os.getenv('API_URL_CALVIN', 'https://lnuv0i4a09.execute-api.us-east-1.amazonaws.com/dev/')
@@ -24,13 +24,18 @@ DB_NAME = 'theologian_chatbot'
 
 # Helper function to connect to the database
 def connect_to_db():
-    return pymysql.connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        database=DB_NAME,
-        cursorclass=pymysql.cursors.DictCursor
-    )
+    try:
+        connection = pymysql.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        return connection
+    except Exception as e:
+        print(f"Error connecting to the database: {e}")
+        return None
 
 # Route to handle chat requests
 @app.route('/chat', methods=['POST', 'OPTIONS'])
@@ -87,37 +92,59 @@ def chat():
 def store_article(title, content):
     try:
         connection = connect_to_db()
+        if connection is None:
+            print("Failed to connect to the database.")
+            return
+
         with connection.cursor() as cursor:
-            sql = "INSERT INTO articles (title, content) VALUES (%s, %s)"
-            cursor.execute(sql, (title, content))
+            # Ensure the articles table exists
+            create_table_query = """
+            CREATE TABLE IF NOT EXISTS articles (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                content TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            """
+            cursor.execute(create_table_query)
+
+            # Insert the article into the database
+            insert_article_query = "INSERT INTO articles (title, content) VALUES (%s, %s)"
+            cursor.execute(insert_article_query, (title, content))
         connection.commit()
     except Exception as e:
         print(f"Error storing article: {e}")
     finally:
-        connection.close()
+        if connection:
+            connection.close()
 
 # Route to fetch articles from the database
 @app.route('/articles', methods=['GET'])
 def get_articles():
     try:
         connection = connect_to_db()
+        if connection is None:
+            print("Failed to connect to the database.")
+            return jsonify({"error": "Error connecting to the database"}), 500
+
         with connection.cursor() as cursor:
-            sql = "SELECT title, content FROM articles"
-            cursor.execute(sql)
+            fetch_articles_query = "SELECT title, content FROM articles"
+            cursor.execute(fetch_articles_query)
             articles = cursor.fetchall()
-        return _build_cors_actual_response(jsonify(articles))
+        return jsonify(articles)
     except Exception as e:
         print(f"Error fetching articles: {e}")
         return jsonify({"error": "Error fetching articles"}), 500
     finally:
-        connection.close()
+        if connection:
+            connection.close()
 
 # Function to handle CORS preflight responses
 def _build_cors_prelight_response():
     response = jsonify({"message": "CORS preflight success"})
     response.headers.add("Access-Control-Allow-Origin", "https://theologiananswers.com")
     response.headers.add("Access-Control-Allow-Headers", "Content-Type")
-    response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS, GET")
+    response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
     return response
 
 # Function to add CORS headers to actual responses
